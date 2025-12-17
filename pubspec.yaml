@@ -1,0 +1,112 @@
+name: amcare1
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # GetX untuk state management & routing
+  get: ^4.6.5
+
+  # HTTP
+  http: ^0.13.6
+
+  # Barcode
+  barcode_widget: ^2.0.4
+
+  # iOS icons
+  cupertino_icons: ^1.0.8
+
+  # Animasi Super Ringan & Keren
+  flutter_staggered_animations: ^1.1.1
+  
+  # Carousel animasi
+  carousel_slider: ^4.2.1
+
+  # Telepon, WhatsApp, Browser
+  url_launcher: ^6.2.4
+
+  # Icon WhatsApp & Sirine
+  font_awesome_flutter: ^10.7.0
+
+  # Storage untuk token / session key
+  get_storage: ^2.1.1
+
+  # HTTP client modern
+  dio: ^5.9.0
+
+  dependencies:
+  flutter:
+    sdk: flutter
+
+  get: ^4.6.6
+  intl: ^0.19.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-SemiBold.ttf
+          weight: 600
+
+  assets:
+    - assets/images/logo_rs.png
+    - assets/images/pendaftaran.png
+    - assets/images/rekam_medis.png
+    - assets/images/antrian.png
+    - assets/images/jadwal.png
+    - assets/images/klinik.png
+    - assets/images/tempat_tidur.png
+    - assets/images/farmasi.png
+    - assets/images/emergency.png
+    - assets/images/promosi.png
+    - assets/images/background-marble.png
+    - assets/images/akupunkture.png
+    - assets/images/anak.png
+    - assets/images/beautycenter.png
+    - assets/images/bedah.png
+    - assets/images/dokterumum.png
+    - assets/images/fisioterapi.png
+    - assets/images/gigi.png
+    - assets/images/hipnoterapi.png
+    - assets/images/jantung.png
+    - assets/images/igd.png
+    - assets/images/kulit.png
+    - assets/images/laboratorium.png
+    - assets/images/laktasi.png
+    - assets/images/mata.png
+    - assets/images/obgyn.png
+    - assets/images/okupasi.png
+    - assets/images/orthopedi.png
+    - assets/images/ozon.png
+    - assets/images/paru.png
+    - assets/images/penyakit dalam b.png
+    - assets/images/penyakitdalam.png
+    - assets/images/psikiatri.png
+    - assets/images/radiologi.png
+    - assets/images/rehab_medik.png
+    - assets/images/stemcell.png
+    - assets/images/syaraf.png
+    - assets/images/terapi_wicara.png
+    - assets/images/THT.png
+    - assets/images/vaksin.png
