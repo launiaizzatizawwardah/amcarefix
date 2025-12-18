@@ -15,7 +15,7 @@ class RiwayatRekamMedisPage1 extends StatelessWidget {
       /// 🔥 BACKGROUND FULL ATAS–BAWAH
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("assets/images/background-marble.png"),
+          image: AssetImage("assets/images/background-marble_result.webp"),
           fit: BoxFit.cover,
         ),
       ),

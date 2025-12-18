@@ -16,7 +16,7 @@ class RiwayatRekamMedisPage extends StatelessWidget {
       /// 🔵 BACKGROUND FULL
       decoration: const BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("assets/images/background-marble.png"),
+          image: AssetImage("assets/images/background-marble_result.webp"),
           fit: BoxFit.cover,
         ),
       ),

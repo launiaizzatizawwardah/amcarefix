@@ -14,7 +14,7 @@ class AntrianFarmasiPage extends StatelessWidget {
           // 🔹 Background marble
           Positioned.fill(
             child: Image.asset(
-              'assets/images/background-marble.png',
+              'assets/images/background-marble_result.webp',
               fit: BoxFit.cover,
             ),
           ),

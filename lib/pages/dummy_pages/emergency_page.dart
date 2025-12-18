@@ -52,7 +52,7 @@ class _EmergencyPageState extends State<EmergencyPage>
           // BACKGROUND
           Positioned.fill(
             child: Image.asset(
-              'assets/images/background-marble.png',
+              'assets/images/background-marble_result.webp',
               fit: BoxFit.cover,
             ),
           ),
