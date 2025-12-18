@@ -248,16 +248,15 @@ class PendaftaranOnlinePage extends StatelessWidget {
                                     return;
                                   }
 
-                                  final dok = c.dokterMap[c.poli.value]
-                                      ?.firstWhere(
-                                    (d) =>
-                                        '${d['nama']} (${d['jam']})' == val,
-                                    orElse: () => {'kuota': 0},
-                                  );
+                                 final dok = c.dokterList.firstWhere(
+  (d) =>
+      '${d['nama_dokter']} (${d['jam_praktek']})' == val,
+  orElse: () => {'kuota': 0},
+);
 
-                                  c.dokter.value = val;
-                                  c.kuota.value =
-                                      (dok?['kuota'] ?? 0) as int;
+c.dokter.value = val;
+c.kuota.value = (dok['kuota'] ?? 0) as int;
+
                                 },
                               ),
 

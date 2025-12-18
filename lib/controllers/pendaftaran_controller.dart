@@ -1,59 +1,132 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '/pages/widget/dialog_success.dart'; // pastikan path ini sesuai
-import '/routes/app_routes.dart'; // ✅ untuk AppRoutes.home1
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import '/pages/widget/dialog_success.dart';
 
 class PendaftaranController extends GetxController {
-  var selectedPasien = ''.obs;
+  final box = GetStorage();
+  final baseUrl = "http://172.16.24.49:7100/api";
+
+  // ================= STATE =================
+  var isLoading = false.obs;
+
+  var selectedPasien = ''.obs; // RM
   var tanggal = Rxn<DateTime>();
   var poli = ''.obs;
   var dokter = ''.obs;
   var kuota = 0.obs;
 
-  // 🔹 Data pasien gabung nama + RM
-  final pasienList = [
-    {'nama': 'Launia Izzati', 'rm': '101523789'},
-    {'nama': 'Dewi Anggraini', 'rm': '101523790'},
-    {'nama': 'Rizky Pratama', 'rm': '101523791'},
-  ];
+  // ================= DATA API =================
+  final pasienList = <Map<String, String>>[].obs;
+  final poliList = <String>[].obs;
+  final dokterList = <Map<String, dynamic>>[].obs;
 
-  // 🔹 Data Poli & Dokter (lokal)
-  final poliList = ['IPD', 'Anak', 'Gigi', 'Umum'];
+  // ================= INIT =================
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProfile();
+    fetchPoli();
+  }
 
-  final dokterMap = {
-    'IPD': [
-      {'nama': 'dr. Joko, ST', 'jam': '08.00 - 12.00', 'kuota': 8},
-      {'nama': 'dr. Rina, SpA', 'jam': '13.00 - 16.00', 'kuota': 5},
-    ],
-    'Anak': [
-      {'nama': 'dr. Budi, SpA', 'jam': '09.00 - 12.00', 'kuota': 10},
-    ],
-    'Gigi': [
-      {'nama': 'drg. Sinta', 'jam': '08.00 - 14.00', 'kuota': 7},
-    ],
-    'Umum': [
-      {'nama': 'dr. Andi', 'jam': '07.00 - 11.00', 'kuota': 4},
-    ],
-  };
+  // =================================================
+  // 🔥 FETCH PROFILE / PASIEN
+  // =================================================
+  Future<void> fetchProfile() async {
+    try {
+      final token = box.read("token");
 
-  // Getter dinamis dokter berdasarkan poli
-  List<Map<String, dynamic>> get dokterList => dokterMap[poli.value] ?? [];
-
-  // 🔹 Ketika user pilih dokter, cari kuota-nya
-  void pilihDokter(String? namaDokter) {
-    dokter.value = namaDokter ?? '';
-    if (dokter.value.isNotEmpty) {
-      final data = dokterList.firstWhere(
-        (d) => d['nama'] == dokter.value,
-        orElse: () => {'kuota': 0},
+      final res = await http.get(
+        Uri.parse("$baseUrl/profile"),
+        headers: {"Authorization": "Key $token"},
       );
-      kuota.value = data['kuota'] ?? 0;
-    } else {
-      kuota.value = 0;
+
+      final json = jsonDecode(res.body);
+      final data = json["data"] as List;
+
+      pasienList.value = data.map((p) => {
+        "nama": p["nama"].toString(),
+        "rm": p["rm"].toString(),
+      }).toList();
+
+    } catch (e) {
+      print("ERROR PROFILE: $e");
     }
   }
 
-  // 🔹 Pilih tanggal periksa
+  // =================================================
+  // 🔥 FETCH POLI / KLINIK
+  // =================================================
+  Future<void> fetchPoli() async {
+    try {
+      final token = box.read("token");
+
+      final res = await http.get(
+        Uri.parse("$baseUrl/poli"),
+        headers: {"Authorization": "Key $token"},
+      );
+
+      final json = jsonDecode(res.body);
+      final data = json["data"] as List;
+
+      poliList.value =
+          data.map((p) => p["nama_poli"].toString()).toList();
+
+    } catch (e) {
+      print("ERROR POLI: $e");
+    }
+  }
+
+  // =================================================
+  // 🔥 FETCH DOKTER BY POLI + TANGGAL
+  // =================================================
+  Future<void> fetchDokter() async {
+    if (poli.isEmpty || tanggal.value == null) return;
+
+    try {
+      isLoading.value = true;
+      final token = box.read("token");
+
+      final res = await http.get(
+        Uri.parse(
+          "$baseUrl/poli-dokter?"
+          "poli=${poli.value}&"
+          "tanggal=${tanggal.value!.toIso8601String()}",
+        ),
+        headers: {"Authorization": "Key $token"},
+      );
+
+      final json = jsonDecode(res.body);
+      dokterList.value =
+          List<Map<String, dynamic>>.from(json["data"]);
+
+    } catch (e) {
+      print("ERROR DOKTER: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // =================================================
+  // 🔥 PILIH DOKTER
+  // =================================================
+  void pilihDokter(String? namaDokter) {
+    dokter.value = namaDokter ?? '';
+
+    final data = dokterList.firstWhere(
+      (d) => d["nama_dokter"] == dokter.value,
+      orElse: () => {"kuota": 0},
+    );
+
+    kuota.value = data["kuota"] ?? 0;
+  }
+
+  // =================================================
+  // 🔥 PILIH TANGGAL
+  // =================================================
   void pilihTanggal(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
@@ -61,11 +134,17 @@ class PendaftaranController extends GetxController {
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
     );
-    if (picked != null) tanggal.value = picked;
+
+    if (picked != null) {
+      tanggal.value = picked;
+      fetchDokter(); // 🔥 otomatis refresh dokter
+    }
   }
 
-  // 🔹 Validasi dan submit form
-  void submitForm(BuildContext context) {
+  // =================================================
+  // 🔥 SUBMIT PENDAFTARAN (REAL API)
+  // =================================================
+  Future<void> submitForm(BuildContext context) async {
     if (selectedPasien.isEmpty ||
         tanggal.value == null ||
         poli.isEmpty ||
@@ -74,20 +153,44 @@ class PendaftaranController extends GetxController {
         'Peringatan',
         'Mohon lengkapi semua data!',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.8),
-        colorText: Colors.white,
       );
-    } else if (kuota.value <= 0) {
+      return;
+    }
+
+    if (kuota.value <= 0) {
       Get.snackbar(
         'Kuota Habis',
         'Kuota untuk dokter ini sudah penuh!',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orangeAccent.withOpacity(0.8),
-        colorText: Colors.white,
       );
-    } else {
-      // ✅ Tampilkan popup sukses
-      showSuccessDialog(context, selectedPasien.value);
+      return;
+    }
+
+    try {
+      final token = box.read("token");
+
+      final res = await http.post(
+        Uri.parse("$baseUrl/pendaftaran"),
+        headers: {
+          "Authorization": "Key $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "rm": selectedPasien.value,
+          "tanggal": tanggal.value!.toIso8601String(),
+          "poli": poli.value,
+          "dokter": dokter.value,
+        }),
+      );
+
+      if (res.statusCode == 200) {
+        showSuccessDialog(context, selectedPasien.value);
+      } else {
+        Get.snackbar("Gagal", "Pendaftaran gagal");
+      }
+
+    } catch (e) {
+      print("ERROR SUBMIT: $e");
     }
   }
 }
